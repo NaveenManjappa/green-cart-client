@@ -107,22 +107,40 @@ export const AppContextProvider = ({ children }) => {
   //Get Cart total amount
   const getCartAmount = () => {
     let totalAmount = 0;
-    console.log("Cart items", cartItems);
+    //console.log("Cart items", cartItems);
     for (const item in cartItems) {
       let itemInfo = products.find((product) => product._id === item);
       if (cartItems[item] > 0) {
         totalAmount += itemInfo.offerPrice * cartItems[item];
       }
     }
-    console.log("TotalAmount", totalAmount);
+   // console.log("TotalAmount", totalAmount);
     return totalAmount;
     //return Math.floor(totalAmount * 100 / 100);
   };
-  useEffect(() => {
-    fetchProducts();
+
+  useEffect(() => {  
     fetchSeller();
     fetchUser();
+    fetchProducts();
   }, []);
+
+  //Update database cart items
+  useEffect(() => {
+    const updateCart = async() => {
+      try {
+        const { data } = await axios.post('api/cart/update',{cartItems});
+        if(!data.success){
+          toast.error(data.message)
+        }
+      } catch (error) {
+        toast.error(error.message);
+      }
+    }
+    if(user){
+      updateCart();
+    }
+  },[cartItems]);
 
   const value = {
     navigate,
@@ -138,6 +156,7 @@ export const AppContextProvider = ({ children }) => {
     updateCartItems,
     removeFromCart,
     cartItems,
+    setCartItems,
     searchQuery,
     setSearchQuery,
     getCartCount,
